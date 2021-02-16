@@ -19,6 +19,7 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
       CAPSULE_LOG: none
+      WORKFLOW: transproteomics-pipeline
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
@@ -28,16 +29,16 @@ jobs:
 
     - name: Build the Docker image
       working-directory: Nextflow
-      run: docker build . --file Dockerfile --tag wombatp/transproteomics-pipeline:dev
+      run: docker build . --file Dockerfile --tag wombatp/${WORKFLOW}:dev
 
     - name: Push Docker image to DockerHub (dev)
       run: |
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-          docker push wombatp/transproteomics-pipeline:dev
+          docker push wombatp/${WORKFLOW}:dev
 
     - name: Pull docker image
       run: |
-          docker pull wombatp/transproteomics-pipeline:dev
+          docker pull wombatp/${WORKFLOW}:dev
 
     - name: Install Nextflow
       run: |
