@@ -12,8 +12,14 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+    strategy:
+      matrix:
+        # Nextflow versions: check pipeline minimum and current latest
+        nxf_ver: ['20.04.0', '']
     steps:
     - uses: actions/checkout@v2
 
@@ -26,30 +32,16 @@ jobs:
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
           docker push wombatp/transproteomics-pipeline:dev
 
-  test:
-    name: Run workflow tests
-    runs-on: ubuntu-latest
-    env:
-      NXF_VER: ${{ matrix.nxf_ver }}
-      NXF_ANSI_LOG: false
-    strategy:
-      matrix:
-        # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['20.04.0', '']
-    steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v2
-
-      - name: Pull docker image
+    - name: Pull docker image
         run: |
           docker pull nfcore/transproteomics-pipeline:dev
-      - name: Install Nextflow
+    - name: Install Nextflow
         env:
           CAPSULE_LOG: none
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Run pipeline with test data
+    - name: Run pipeline with test data
         working-directory: Nextflow
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
