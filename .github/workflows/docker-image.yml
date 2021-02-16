@@ -36,7 +36,8 @@ jobs:
       run: |
           docker pull wombatp/transproteomics-pipeline:dev
     - name: Install Nextflow
-      env: CAPSULE_LOG: none
+      env:
+	CAPSULE_LOG: none
       run: |
       	  wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
