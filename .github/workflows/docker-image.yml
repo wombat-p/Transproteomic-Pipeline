@@ -16,6 +16,7 @@ jobs:
       NXF_ANSI_LOG: false
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+      CAPSULE_LOG: none
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
@@ -36,8 +37,6 @@ jobs:
       run: |
           docker pull wombatp/transproteomics-pipeline:dev
     - name: Install Nextflow
-      env:
-	CAPSULE_LOG: none
       run: |
       	  wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
