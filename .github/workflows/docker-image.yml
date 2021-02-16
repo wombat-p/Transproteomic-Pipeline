@@ -33,17 +33,17 @@ jobs:
           docker push wombatp/transproteomics-pipeline:dev
 
     - name: Pull docker image
-        run: |
-          docker pull nfcore/transproteomics-pipeline:dev
+      run: |
+          docker pull wombatp/transproteomics-pipeline:dev
     - name: Install Nextflow
-        env:
+      env:
           CAPSULE_LOG: none
-        run: |
+      run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
     - name: Run pipeline with test data
         working-directory: Nextflow
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
-        run: |
+      run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
