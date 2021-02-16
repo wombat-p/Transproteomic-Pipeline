@@ -29,7 +29,6 @@ jobs:
   test:
     name: Run workflow tests
     runs-on: ubuntu-latest
-    working-directory: Nextflow
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
@@ -51,6 +50,7 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
       - name: Run pipeline with test data
+        working-directory: Nextflow
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
