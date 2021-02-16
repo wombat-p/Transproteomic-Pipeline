@@ -25,4 +25,3 @@ jobs:
       run: |
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
           docker push wombatp/transproteomics-pipeline:dev
-	  
