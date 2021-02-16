@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file NextFlow/Dockerfile --tag wombatp/transproteomics-pipeline:dev
+      run: docker build . --file Nextflow/Dockerfile --tag wombatp/transproteomics-pipeline:dev
     - name: Push Docker image to DockerHub (dev)
       run: |
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
