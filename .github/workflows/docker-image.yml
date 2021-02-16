@@ -42,9 +42,6 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
-      run: |
-      	  wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
     - name: Run pipeline with test data
         working-directory: Nextflow
         # For example: adding multiple test runs with different parameters
