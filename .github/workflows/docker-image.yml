@@ -36,7 +36,12 @@ jobs:
     - name: Pull docker image
       run: |
           docker pull wombatp/transproteomics-pipeline:dev
+
     - name: Install Nextflow
+      run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+
       run: |
       	  wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
