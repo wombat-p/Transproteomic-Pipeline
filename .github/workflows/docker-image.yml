@@ -16,11 +16,11 @@ jobs:
       DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
     steps:
     - uses: actions/checkout@v2
+
     - name: Build the Docker image
-      run: |
-          cd Nextflow
+      run: cd Nextflow \
 	  docker build . --file Dockerfile --tag wombatp/transproteomics-pipeline:dev
+
     - name: Push Docker image to DockerHub (dev)
-      run: |
-          echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      run: echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin \
           docker push wombatp/transproteomics-pipeline:dev
