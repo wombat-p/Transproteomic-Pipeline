@@ -1,5 +1,6 @@
-name: Docker Image CI
-2
+name: Docker image build and test
+# This workflow is triggered on pushes and PRs to the repository.
+
 on:
   push:
     branches: [ dev ]
