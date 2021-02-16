@@ -1,0 +1,75 @@
+Jan-15 11:40:00.695 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf -profile docker,test -resume
+Jan-15 11:40:00.829 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 20.10.0
+Jan-15 11:40:00.843 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [ridiculous_hypatia] - revision: 80d060cd40
+Jan-15 11:40:00.868 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/IS_Benchmarking/TPP/Nextflow/nextflow.config
+Jan-15 11:40:00.869 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/IS_Benchmarking/TPP/Nextflow/nextflow.config
+Jan-15 11:40:00.889 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `docker,test`
+Jan-15 11:40:02.217 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [debug, test, conda, awsbatch, singularity, docker]
+Jan-15 11:40:02.326 [main] DEBUG nextflow.Session - Session uuid: 21c9a0de-c72e-4f1a-ae64-5729114cabed
+Jan-15 11:40:02.326 [main] DEBUG nextflow.Session - Run name: ridiculous_hypatia
+Jan-15 11:40:02.327 [main] DEBUG nextflow.Session - Executor pool size: 12
+Jan-15 11:40:02.393 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 20.10.0 build 5430
+  Created: 01-11-2020 15:14 UTC (16:14 CEST)
+  System: Linux 5.4.0-58-generic
+  Runtime: Groovy 3.0.5 on OpenJDK 64-Bit Server VM 11.0.9.1+1-Ubuntu-0ubuntu1.20.04
+  Encoding: UTF-8 (UTF-8)
+  Process: 788685@adm-125488 [127.0.0.1]
+  CPUs: 12 - Mem: 31.2 GB (1.7 GB) - Swap: 976 MB (481.8 MB)
+Jan-15 11:40:02.468 [main] DEBUG nextflow.Session - Work-dir: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/IS_Benchmarking/TPP/Nextflow/work [ext2/ext3]
+Jan-15 11:40:02.542 [main] DEBUG nextflow.Session - Observer factory: TowerFactory
+Jan-15 11:40:02.545 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Jan-15 11:40:02.813 [main] DEBUG nextflow.Session - Session start invoked
+Jan-15 11:40:04.151 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Jan-15 11:40:04.168 [main] DEBUG nextflow.Session - Workflow process names [dsl1]: set_comet_configuration, run_merge_quant, convert_stpeter, convert_raw_mzml, db_search_comet, run_peptideprophet, run_proteinprophet, run_stpeter
+Jan-15 11:40:04.376 [main] WARN  nextflow.Nextflow - No experimental design! All raw files will be considered being from the one and the same experimental condition.
+Jan-15 11:40:04.478 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-15 11:40:04.479 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-15 11:40:04.487 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Jan-15 11:40:04.498 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=12; memory=31.2 GB; capacity=12; pollInterval=100ms; dumpInterval=5m
+Jan-15 11:40:04.682 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-15 11:40:04.683 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-15 11:40:04.714 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-15 11:40:04.715 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-15 11:40:04.750 [main] DEBUG nextflow.processor.TaskProcessor - Creating *combiner* operator for each param(s) at index(es): [0]
+Jan-15 11:40:04.771 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-15 11:40:04.773 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-15 11:40:04.782 [main] DEBUG nextflow.processor.TaskProcessor - Creating *combiner* operator for each param(s) at index(es): [0]
+Jan-15 11:40:04.808 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-15 11:40:04.808 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-15 11:40:04.852 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-15 11:40:04.853 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-15 11:40:04.861 [main] DEBUG nextflow.processor.TaskProcessor - Creating *combiner* operator for each param(s) at index(es): [1]
+Jan-15 11:40:04.873 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-15 11:40:04.873 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-15 11:40:04.917 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-15 11:40:04.917 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-15 11:40:04.934 [main] DEBUG nextflow.script.ScriptRunner - > Await termination 
+Jan-15 11:40:04.934 [main] DEBUG nextflow.Session - Session await
+Jan-15 11:40:05.024 [Actor Thread 6] DEBUG nextflow.util.CacheHelper - Unable to get file attributes file: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/IS_Benchmarking/TPP/Nextflow/none -- Cause: java.nio.file.NoSuchFileException: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/IS_Benchmarking/TPP/Nextflow/none
+Jan-15 11:40:05.072 [Actor Thread 3] INFO  nextflow.processor.TaskProcessor - [c2/9323a8] Cached process > convert_raw_mzml (1)
+Jan-15 11:40:05.072 [Actor Thread 6] INFO  nextflow.processor.TaskProcessor - [7f/55491c] Cached process > set_comet_configuration (1)
+Jan-15 11:40:05.072 [Actor Thread 4] INFO  nextflow.processor.TaskProcessor - [55/4a81ce] Cached process > convert_raw_mzml (2)
+Jan-15 11:40:05.128 [Actor Thread 3] INFO  nextflow.processor.TaskProcessor - [7a/816d73] Cached process > db_search_comet (2)
+Jan-15 11:40:05.133 [Actor Thread 5] INFO  nextflow.processor.TaskProcessor - [44/60b2f3] Cached process > db_search_comet (1)
+Jan-15 11:40:05.250 [Actor Thread 5] INFO  nextflow.processor.TaskProcessor - [6f/e0eb20] Cached process > run_peptideprophet (1)
+Jan-15 11:40:05.253 [Actor Thread 3] INFO  nextflow.processor.TaskProcessor - [23/c10372] Cached process > run_peptideprophet (2)
+Jan-15 11:40:05.273 [Actor Thread 4] INFO  nextflow.processor.TaskProcessor - [10/208d96] Cached process > run_proteinprophet (1)
+Jan-15 11:40:05.274 [Actor Thread 5] INFO  nextflow.processor.TaskProcessor - [d9/bb38f7] Cached process > run_proteinprophet (2)
+Jan-15 11:40:05.318 [Actor Thread 8] INFO  nextflow.processor.TaskProcessor - [5d/011c19] Cached process > run_stpeter (2)
+Jan-15 11:40:05.321 [Actor Thread 1] INFO  nextflow.processor.TaskProcessor - [fe/c265d9] Cached process > run_stpeter (1)
+Jan-15 11:40:05.331 [Actor Thread 4] INFO  nextflow.processor.TaskProcessor - [99/592439] Cached process > convert_stpeter (1)
+Jan-15 11:40:05.332 [Actor Thread 3] INFO  nextflow.processor.TaskProcessor - [ac/3c3d57] Cached process > convert_stpeter (2)
+Jan-15 11:40:05.350 [Actor Thread 1] DEBUG nextflow.util.CacheHelper - Unable to get file attributes file: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/IS_Benchmarking/TPP/Nextflow/none -- Cause: java.nio.file.NoSuchFileException: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/IS_Benchmarking/TPP/Nextflow/none
+Jan-15 11:40:05.458 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-15 11:40:05.465 [Task submitter] INFO  nextflow.Session - [d1/32b8f3] Submitted process > run_merge_quant (1)
+Jan-15 11:40:07.190 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 14; name: run_merge_quant (1); status: COMPLETED; exit: 0; error: -; workDir: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/IS_Benchmarking/TPP/Nextflow/work/d1/32b8f3b0061e6f4c3c2d44f7571957]
+Jan-15 11:40:07.194 [main] DEBUG nextflow.Session - Session await > all process finished
+Jan-15 11:40:07.197 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Jan-15 11:40:07.199 [main] INFO  nextflow.Nextflow - 
+Done! Open the files in the following folder --> ./results
+
+Jan-15 11:40:07.214 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=1; failedCount=0; ignoredCount=0; cachedCount=13; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=1.7s; failedDuration=0ms; cachedDuration=1m 12s;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=6 GB; ]
+Jan-15 11:40:07.322 [main] DEBUG nextflow.CacheDB - Closing CacheDB done
+Jan-15 11:40:07.329 [main] DEBUG nextflow.util.SpuriousDeps - AWS S3 uploader shutdown
+Jan-15 11:40:07.352 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
