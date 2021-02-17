@@ -1,7 +1,14 @@
 # Workflow to analyze label-free data with the trans-proteomic pipeline
 
-This workflow is based on a docker image which is available at the docker hub (https://hub.docker.com/repository/docker/veitveit/tppworkflow) and is downloaded automatically.
-If you want to build your own docker image, be ware taht it needs to be named veitveit/tppworkflow:dev or change the name in the configuration file. 
+This workflow is based on a docker image which is available at the docker hub (https://hub.docker.com/repository/docker/wombatp/transproteomic-pipeline) and is downloaded automatically.
+If you want to build your own docker image, be ware taht it needs to be named wombatp/transproteomic-pipeline:dev or change the name in the configuration file. 
+
+## Content
+
+_Nextflow folder:_ Implementation of workflow
+
+_Results folder:_ Output from running the UPS data set
+
 
 ## Getting started
 
@@ -18,8 +25,8 @@ sudo usermod -aG docker $USER
 newgrp docker
 
 # Fetch scripts and data
-git clone https://github.com/veitveit/IS_Benchmarking.git
-cd ./IS_Benchmarking/TPP/Nextflow/data
+git clone https://github.com/wombat-p/Transproteomic-Pipeline.git
+cd ./Transproteomics-Pipeline/Nextflow/data
 
 # Nextflow
 cd ..
