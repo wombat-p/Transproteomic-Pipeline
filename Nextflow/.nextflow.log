@@ -1,0 +1,175 @@
+Apr-08 12:24:03.896 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf -profile docker,test
+Apr-08 12:24:04.000 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 20.10.0
+Apr-08 12:24:04.023 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [shrivelled_pare] - revision: 55ccddcdf3
+Apr-08 12:24:04.060 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/WOMBAT-P/Transproteomic-Pipeline/Nextflow/nextflow.config
+Apr-08 12:24:04.062 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/WOMBAT-P/Transproteomic-Pipeline/Nextflow/nextflow.config
+Apr-08 12:24:04.092 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `docker,test`
+Apr-08 12:24:05.565 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [debug, test, conda, awsbatch, singularity, docker]
+Apr-08 12:24:05.646 [main] DEBUG nextflow.Session - Session uuid: 8cacc69b-9569-464b-819e-e0d70dac51fa
+Apr-08 12:24:05.646 [main] DEBUG nextflow.Session - Run name: shrivelled_pare
+Apr-08 12:24:05.647 [main] DEBUG nextflow.Session - Executor pool size: 12
+Apr-08 12:24:05.698 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 20.10.0 build 5430
+  Created: 01-11-2020 15:14 UTC (16:14 CEST)
+  System: Linux 5.4.0-62-generic
+  Runtime: Groovy 3.0.5 on OpenJDK 64-Bit Server VM 11.0.10+9-Ubuntu-0ubuntu1.20.04
+  Encoding: UTF-8 (UTF-8)
+  Process: 1392167@adm-125488 [127.0.0.1]
+  CPUs: 12 - Mem: 31.2 GB (3.9 GB) - Swap: 976 MB (15.4 MB)
+Apr-08 12:24:05.739 [main] DEBUG nextflow.Session - Work-dir: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/WOMBAT-P/Transproteomic-Pipeline/Nextflow/work [ext2/ext3]
+Apr-08 12:24:05.813 [main] DEBUG nextflow.Session - Observer factory: TowerFactory
+Apr-08 12:24:05.816 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Apr-08 12:24:06.063 [main] DEBUG nextflow.Session - Session start invoked
+Apr-08 12:24:07.302 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Apr-08 12:24:07.323 [main] DEBUG nextflow.Session - Workflow process names [dsl1]: set_comet_configuration, run_merge_quant, convert_stpeter, convert_raw_mzml, db_search_comet, run_peptideprophet, run_proteinprophet, run_stpeter
+Apr-08 12:24:07.524 [main] WARN  nextflow.Nextflow - No experimental design! All raw files will be considered being from the one and the same experimental condition.
+Apr-08 12:24:07.657 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Apr-08 12:24:07.657 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Apr-08 12:24:07.667 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Apr-08 12:24:07.680 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=4; memory=25 GB; capacity=10; pollInterval=100ms; dumpInterval=5m
+Apr-08 12:24:07.849 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Apr-08 12:24:07.849 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Apr-08 12:24:07.883 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Apr-08 12:24:07.889 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Apr-08 12:24:07.941 [main] DEBUG nextflow.processor.TaskProcessor - Creating *combiner* operator for each param(s) at index(es): [0]
+Apr-08 12:24:07.960 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Apr-08 12:24:07.960 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Apr-08 12:24:07.972 [main] DEBUG nextflow.processor.TaskProcessor - Creating *combiner* operator for each param(s) at index(es): [0]
+Apr-08 12:24:08.007 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Apr-08 12:24:08.008 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Apr-08 12:24:08.037 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Apr-08 12:24:08.037 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Apr-08 12:24:08.044 [main] DEBUG nextflow.processor.TaskProcessor - Creating *combiner* operator for each param(s) at index(es): [1]
+Apr-08 12:24:08.058 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Apr-08 12:24:08.058 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Apr-08 12:24:08.085 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Apr-08 12:24:08.085 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Apr-08 12:24:08.099 [main] DEBUG nextflow.script.ScriptRunner - > Await termination 
+Apr-08 12:24:08.099 [main] DEBUG nextflow.Session - Session await
+Apr-08 12:24:08.164 [Actor Thread 6] DEBUG nextflow.util.CacheHelper - Unable to get file attributes file: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/WOMBAT-P/Transproteomic-Pipeline/Nextflow/none -- Cause: java.nio.file.NoSuchFileException: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/WOMBAT-P/Transproteomic-Pipeline/Nextflow/none
+Apr-08 12:24:08.179 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Apr-08 12:24:08.188 [Task submitter] INFO  nextflow.Session - [d9/0d4d4b] Submitted process > convert_raw_mzml (2)
+Apr-08 12:24:08.203 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Apr-08 12:24:08.203 [Task submitter] INFO  nextflow.Session - [e1/f3c9ab] Submitted process > convert_raw_mzml (1)
+Apr-08 12:27:22.539 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: convert_raw_mzml (2); status: COMPLETED; exit: 1; error: -; workDir: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/WOMBAT-P/Transproteomic-Pipeline/Nextflow/work/d9/0d4d4b6acf887d1a25cc45cef6f815]
+Apr-08 12:27:22.545 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Apr-08 12:27:22.546 [Task submitter] INFO  nextflow.Session - [e5/bbce1a] Submitted process > set_comet_configuration (1)
+Apr-08 12:27:22.590 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'convert_raw_mzml (2)'
+
+Caused by:
+  Process `convert_raw_mzml (2)` terminated with an error exit status (1)
+
+Command executed:
+
+  ThermoRawFileParser.sh -i OVEMB150205_14.raw -o ./  -f 2 -z
+
+Command exit status:
+  1
+
+Command output:
+  2021-04-08 10:27:21 INFO Started parsing OVEMB150205_14.raw
+  2021-04-08 10:27:21 ERROR Error opening (ThermoFisher.CommonCore.RawFileReader.Facade.RawFileLoader) - OVEMB150205_14.raw
+
+Command error:
+  381f50777f47: Pulling fs layer
+  85198df8fabf: Waiting
+  c6492430e10c: Pulling fs layer
+  c00670263012: Pulling fs layer
+  dc7b368ac9b8: Pulling fs layer
+  c6492430e10c: Waiting
+  381f50777f47: Waiting
+  852e50cd189d: Verifying Checksum
+  852e50cd189d: Download complete
+  852e50cd189d: Pull complete
+  f77c7a5ca570: Verifying Checksum
+  f77c7a5ca570: Download complete
+  8282acd31ad3: Verifying Checksum
+  8282acd31ad3: Download complete
+  e556299b3dc3: Download complete
+  679c171d6942: Verifying Checksum
+  679c171d6942: Download complete
+  44b7e71bd7b6: Download complete
+  a6236801494d: Verifying Checksum
+  a6236801494d: Download complete
+  a6236801494d: Pull complete
+  679c171d6942: Pull complete
+  f77c7a5ca570: Pull complete
+  8282acd31ad3: Pull complete
+  e556299b3dc3: Pull complete
+  44b7e71bd7b6: Pull complete
+  85198df8fabf: Verifying Checksum
+  85198df8fabf: Download complete
+  8a0847fcb336: Verifying Checksum
+  8a0847fcb336: Download complete
+  c6492430e10c: Verifying Checksum
+  c6492430e10c: Download complete
+  c00670263012: Verifying Checksum
+  c00670263012: Download complete
+  dc7b368ac9b8: Verifying Checksum
+  dc7b368ac9b8: Download complete
+  381f50777f47: Verifying Checksum
+  381f50777f47: Download complete
+  f37d1a614789: Verifying Checksum
+  f37d1a614789: Download complete
+  f37d1a614789: Pull complete
+  8a0847fcb336: Pull complete
+  85198df8fabf: Pull complete
+  381f50777f47: Pull complete
+  c6492430e10c: Pull complete
+  c00670263012: Pull complete
+  dc7b368ac9b8: Pull complete
+  Digest: sha256:f0da96dd2979431cb20bcc3c087ba26b5082c3f062b4ca5049781cd9ffeec0f1
+  Status: Image is up to date for wombatp/transproteomic-pipeline:dev
+  WARNING: Your kernel does not support swap limit capabilities or the cgroup is not mounted. Memory limited without swap.
+
+Work dir:
+  /home/veits/devel/Bioinformatics/ELIXIR_EDAM/WOMBAT-P/Transproteomic-Pipeline/Nextflow/work/d9/0d4d4b6acf887d1a25cc45cef6f815
+
+Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
+Apr-08 12:27:22.604 [Task monitor] DEBUG nextflow.Session - Session aborted -- Cause: Process `convert_raw_mzml (2)` terminated with an error exit status (1)
+Apr-08 12:27:22.638 [Task monitor] DEBUG nextflow.Session - The following nodes are still active:
+[process] db_search_comet
+  status=ACTIVE
+  port 0: (value) OPEN  ; channel: __$eachinparam<0>
+  port 1: (queue) OPEN  ; channel: fasta
+  port 2: (queue) OPEN  ; channel: comet_param
+  port 3: (cntrl) -     ; channel: $
+
+[process] run_peptideprophet
+  status=ACTIVE
+  port 0: (value) OPEN  ; channel: __$eachinparam<0>
+  port 1: (queue) OPEN  ; channel: fasta
+  port 2: (cntrl) -     ; channel: $
+
+[process] run_proteinprophet
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: pepxml_file
+  port 1: (cntrl) -     ; channel: $
+
+[process] run_stpeter
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: __$eachinparam<1>
+  port 2: (cntrl) -     ; channel: $
+
+[process] convert_stpeter
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] run_merge_quant
+  status=ACTIVE
+  port 0: (value) OPEN  ; channel: csv_files
+  port 1: (value) bound ; channel: raw_files
+  port 2: (queue) OPEN  ; channel: exp_design_file
+  port 3: (cntrl) -     ; channel: $
+
+Apr-08 12:27:22.643 [main] DEBUG nextflow.Session - Session await > all process finished
+Apr-08 12:27:22.643 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Apr-08 12:27:22.656 [main] INFO  nextflow.Nextflow - Oops .. something went wrong
+Apr-08 12:27:22.661 [main] WARN  n.processor.TaskPollingMonitor - Killing pending tasks (2)
+Apr-08 12:27:22.664 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: convert_raw_mzml (1); status: COMPLETED; exit: 1; error: -; workDir: /home/veits/devel/Bioinformatics/ELIXIR_EDAM/WOMBAT-P/Transproteomic-Pipeline/Nextflow/work/e1/f3c9ab5a8e7efbdb252fdee18962fe]
+Apr-08 12:27:22.764 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=2; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=1; runningCount=-1; retriesCount=0; abortedCount=1; succeedDuration=0ms; failedDuration=12m 57s; cachedDuration=0ms;loadCpus=-2; loadMemory=0; peakRunning=2; peakCpus=4; peakMemory=12 GB; ]
+Apr-08 12:27:22.884 [main] DEBUG nextflow.CacheDB - Closing CacheDB done
+Apr-08 12:27:22.891 [main] DEBUG nextflow.util.SpuriousDeps - AWS S3 uploader shutdown
+Apr-08 12:27:22.908 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

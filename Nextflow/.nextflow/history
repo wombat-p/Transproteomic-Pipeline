@@ -1,0 +1,1 @@
+2021-04-08 12:24:05	3m 18s	shrivelled_pare	ERR	55ccddcdf33b4b83de139b43ba185fdc	8cacc69b-9569-464b-819e-e0d70dac51fa	nextflow run main.nf -profile docker,test
