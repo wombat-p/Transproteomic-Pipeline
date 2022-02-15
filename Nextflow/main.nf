@@ -179,7 +179,7 @@ if (params.experiment_design == "none") {
 
 
 /*
- * STEP 1 - convert raw files to mgf
+ * STEP 1 - convert raw files to mzml
  */
 process convert_raw_mzml {
     publishDir "${params.outdir}"
