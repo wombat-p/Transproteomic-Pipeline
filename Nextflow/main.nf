@@ -107,6 +107,7 @@ params.fixed_mods = 'Carbamidomethylation of C'
 params.variable_mods = 'Oxidation of M'
 
 
+
 params.skip_decoy_generation = false
 if (params.skip_decoy_generation) {
 log.warn "Be aware: skipping decoy generation will prevent generating variants and subset FDR refinement"
@@ -373,9 +374,12 @@ process convert_stpeter {
     """
     cp "${stpeter}" StPeterOut.prot.xml 
     cp "${pepxml}" Sample.pep.xml
-    python $baseDir/scripts/protXML2csv.py 
-    mv StPeterProts.csv "${stpeter.baseName}_prot.csv"
-    mv StPeterPeps.csv "${stpeter.baseName}_pep.csv"
+    Rscript $baseDir/scripts/proxml2csv.R --xml=StPeterOut.prot.xml
+#    python $baseDir/scripts/protXML2csv.py 
+#    mv StPeterProts.csv "${stpeter.baseName}_prot.csv"
+#    mv StPeterPeps.csv "${stpeter.baseName}_pep.csv"
+    mv StPeterOut.prot.xml.csv "${stpeter.baseName}_pep.csv"
+    mv StPeterOut.prot.xml_summary.csv "${stpeter.baseName}_prot.csv"
     """
     
 }

@@ -9,5 +9,7 @@ dependencies:
 # removed as too old
 #  - tpp=5.0.0
   - comet-ms=2019014
-  - r-base=3.6.1
+  - r-progress=1.2.2
+  - r-xml=3.99-0.8
+  - r-stringi=1.7.6
   - pyteomics=4.4.0
