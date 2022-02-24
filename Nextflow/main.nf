@@ -38,8 +38,8 @@ def helpMessage() {
       --fixed_mods                      Not working yet. Fixed modification is always 'Carbamidomethyl (C)'
       --variable_mods                   Only variable modifications 'Oxidation of M' 'Acetylation of protein N-term' and 'Phosphorylation of STY' allowed. Separated by commas without additional spaces
       --num_hits                        Number of reported hits
-     --min_charge                       Minimal precursor charge 
-     --max_charge                       Maximal precursor charge 
+      --min_charge                      Minimal precursor charge 
+      --max_charge                      Maximal precursor charge 
       --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
       --comet_param_file                Parameter file for comet database search. This will overwrite all other parameters for the comet search
       
@@ -107,11 +107,10 @@ params.fixed_mods = 'Carbamidomethylation of C'
 params.variable_mods = 'Oxidation of M'
 
 
-
 params.skip_decoy_generation = false
 if (params.skip_decoy_generation) {
-log.warn "Be aware: skipping decoy generation will prevent generating variants and subset FDR refinement"
-log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database"
+  log.warn "Be aware: skipping decoy generation will prevent generating variants and subset FDR refinement"
+  log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database"
 }
 
 params.quantification_fdr = 0.01
@@ -138,291 +137,311 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
 }
 
 
-
-
 /*
  * Create a channel for input raw files
  */
-  Channel
-        .fromPath( params.raws ).into {input_raw; input_raw2}
+input_raw = Channel.fromPath( params.raws )
+input_raw.into { raws_convert; raws_merge_quant }
 
 /*
  * Create a channel for fasta file
  */
-  Channel
-        .fromPath( params.fasta ).into {input_fasta; input_fasta2; input_fasta3}
+input_fasta = Channel.fromPath( params.fasta )
+input_fasta.into { fasta_search_comet; fasta_peptideprophet; fasta_stpeter }
 
 /*
  * Create a channel for comet parameter file
  */
-  input_comet_param =   Channel
-        .fromPath( params.comet_param_file )
+input_comet_param = Channel.fromPath( params.comet_param_file )
 
-if (params.comet_param_file == "none") {
-} else if( !(file(params.comet_param_file).exists()) ) {
-        log.error "Comet parameter file does not exit"; exit 1
-    
+if ((params.comet_param_file != "none") && !(file(params.comet_param_file).exists())) {
+  log.error "Specified comet parameter file does not exit"; exit 1
 }
 
 
 /* 
  * Create a channel for experimental design file
  */
-input_exp_design =  Channel.fromPath(params.experiment_design)
+input_exp_design = Channel.fromPath(params.experiment_design)
 if (params.experiment_design == "none") {
-    log.warn "No experimental design! All raw files will be considered being from the one and the same experimental condition."
+  log.warn "No experimental design! All raw files will be considered being from the one and the same experimental condition."
 } else if(!(file(params.experiment_design).exists())) {
-        log.error "File with experimental design does not exit"; exit 1
-    
+  log.error "File with experimental design does not exit"; exit 1  
 }
-
 
 
 /*
  * STEP 1 - convert raw files to mzml
  */
 process convert_raw_mzml {
-    publishDir "${params.outdir}"
-    input:
-      file rawfile from input_raw
+  label 'process_low'
+  label 'process_single_thread'
 
-    output:
-     file "${rawfile.baseName}.mzML" into (mzml, mzml2)
-
-    script:
-     """
-     ThermoRawFileParser.sh -i ${rawfile} -o ./  -f 2 -z
-     """
-
+  publishDir "${params.outdir}/mzMLs", mode:'copy'
+  
+  input:
+  file rawfile from raws_convert
+  
+  output:
+  file "${rawfile.baseName}.mzML" into mzmls_search_comet
+  
+  script:
+  """
+  ThermoRawFileParser.sh -i ${rawfile} -o ./  -f 2 -z
+  """
 }
+
 
 /*
  * STEP 3 - set comet parameter file
  */
 process set_comet_configuration {
-    publishDir "${params.outdir}"
-    input:
-      file comet_param from input_comet_param.ifEmpty(file("none"))
-     output:
-      file "comet.params" into (comet_param_file)
-    script: 
-    // no file provided
-    if (comet_param.getName() == "none") {  
-      ttrue = true
-      enzymemap = ["Trypsin": 1, "Trypsin/P": 2, "Lys_C": 3, "Lys_N": 4, "Arg_C": 5, "Asp_N": 6, "CNBr": 7, "Glu_C": 8, "PepsinA": 9, "Chymotrypsin": 10, "Unspecified": 0]
-      enzyme = enzymemap[params.enzyme]
-      if (enzyme == null) enzyme = enzymemap["Unspecified"]
-      skip_decoy = params.skip_decoy_generation
-      modmap = ["Oxidation of M": "15.9949 M 0 3 -1 0 0 0.0", "Phosphorylation of STY": "79.966331 STY 0 3 -1 0 0 97.976896", "Acetylation of K": "42.010565 K 0 3 -1 0 0", "Acetylation of protein N-term": " 42.010565 n 0 3 0 0 0", "none": "0.0 X 0 3 -1 0"]
-      mods = params.variable_mods.split(",")  
-      modout = ""
-      for (int i=0; i<10; i++) {
-        if(mods.size() > i ) {
-          tmod =  modmap[mods[i]]
-          if (tmod != null) {
-              modout += "variable_mod0" + i + " = " + tmod + "\n"
-          } else {
-              modout += "variable_mod0" + i + " = " + modmap["none"] + "\n"     
-          }
-        } else {
-            modout += "variable_mod0" + i + " = " + modmap["none"] + "\n"     
-        }
-      }
-      """
-      comet -p
-      mv comet.params.new comet.params
-      sed -i '/decoy_search/d' comet.params
-      if [ "${skip_decoy}" = "${ttrue}" ]
-          then
-             echo "decoy_search = 0" >> comet.params
-      else
-             echo "decoy_search = 1" >> comet.params
-      fi
-      # given in ppm
-      sed -i '/num_threads/d' comet.params
-      echo "num_threads = ${task.cpus}" >> comet.params
-      sed -i '/peptide_mass_tolerance/d' comet.params
-      echo "peptide_mass_tolerance = ${params.precursor_mass_tolerance}" >> comet.params
-      sed -i '/search_enzyme_number/d' comet.params
-      echo "search_enzyme_number = ${enzyme}" >> comet.params
-      # given in da and assuming high resolution
-      sed -i '/fragment_bin_tol/d' comet.params
-      sed -i '/fragment_bin_offset/d' comet.params
-      echo "fragment_bin_tol = ${params.fragment_mass_tolerance}" >> comet.params
-      echo "fragment_bin_offset = 0.0" >> comet.params
-      # mass range
-      sed -i '/activation_method/d' comet.params
-      echo "activation_method = ${params.activation_method}" >> comet.params
-      sed -i '/allowed_missed_cleavage/d' comet.params
-      echo "allowed_missed_cleavage = ${params.miscleavages}" >> comet.params
-      sed -i '/max_variable_mods_in_peptide/d' comet.params
-      echo "max_variable_mods_in_peptide = ${params.number_mods}" >> comet.params
-      sed -i '/num_results/d' comet.params
-      echo "num_results = ${params.num_hits}" >> comet.params
-      sed -i '/precursor_charge/d' comet.params
-      echo "precursor_charge = ${params.min_charge} ${params.max_charge}" >> comet.params  
-      sed -i '/variable_mod0/d' comet.params
-      echo "${modout}" >> comet.params
-      """ 
-       // with a given comet file, all other paramter will be discarded
-    } else {
-          """
-          cp ${comet_param} comet.params
-          """
+  label 'process_very_low'
+  label 'process_single_thread'
+
+  publishDir "${params.outdir}/params", mode:'copy'
+  
+  input:
+  file comet_param from input_comet_param.ifEmpty(file("none"))
+  
+  output:
+  file "comet.params" into (comet_param_file)
+  
+  script: 
+  if (comet_param.getName() == "none") {  
+    // no param file provided
+    ttrue = true
+    enzymemap = ["Trypsin": 1, "Trypsin/P": 2, "Lys_C": 3, "Lys_N": 4, "Arg_C": 5, "Asp_N": 6, "CNBr": 7, "Glu_C": 8, "PepsinA": 9, "Chymotrypsin": 10, "Unspecified": 0]
+    enzyme = enzymemap[params.enzyme]
+    if (enzyme == null) {
+      enzyme = enzymemap["Unspecified"]
     }
+    skip_decoy = params.skip_decoy_generation
+    modmap = ["Oxidation of M": "15.9949 M 0 3 -1 0 0 0.0", "Phosphorylation of STY": "79.966331 STY 0 3 -1 0 0 97.976896", "Acetylation of K": "42.010565 K 0 3 -1 0 0", "Acetylation of protein N-term": " 42.010565 n 0 3 0 0 0", "none": "0.0 X 0 3 -1 0"]
+    mods = params.variable_mods.split(",")  
+    modout = ""
+    for (int i=0; i<10; i++) {
+      if(mods.size() > i ) {
+        tmod =  modmap[mods[i]]
+        if (tmod != null) {
+          modout += "variable_mod0" + i + " = " + tmod + "\n"
+        } else {
+          modout += "variable_mod0" + i + " = " + modmap["none"] + "\n"
+        }
+      } else {
+        modout += "variable_mod0" + i + " = " + modmap["none"] + "\n"
+      }
+    }
+    
+    """
+    comet -p
+    mv comet.params.new comet.params
+    sed -i '/decoy_search/d' comet.params
+    if [ "${skip_decoy}" = "${ttrue}" ]
+    then
+      echo "decoy_search = 0" >> comet.params
+    else
+      echo "decoy_search = 1" >> comet.params
+    fi
+    # given in ppm
+    sed -i '/num_threads/d' comet.params
+    echo "num_threads = ${task.cpus}" >> comet.params
+    sed -i '/peptide_mass_tolerance/d' comet.params
+    echo "peptide_mass_tolerance = ${params.precursor_mass_tolerance}" >> comet.params
+    sed -i '/search_enzyme_number/d' comet.params
+    echo "search_enzyme_number = ${enzyme}" >> comet.params
+    # given in da and assuming high resolution
+    sed -i '/fragment_bin_tol/d' comet.params
+    sed -i '/fragment_bin_offset/d' comet.params
+    echo "fragment_bin_tol = ${params.fragment_mass_tolerance}" >> comet.params
+    echo "fragment_bin_offset = 0.0" >> comet.params
+    # mass range
+    sed -i '/activation_method/d' comet.params
+    echo "activation_method = ${params.activation_method}" >> comet.params
+    sed -i '/allowed_missed_cleavage/d' comet.params
+    echo "allowed_missed_cleavage = ${params.miscleavages}" >> comet.params
+    sed -i '/max_variable_mods_in_peptide/d' comet.params
+    echo "max_variable_mods_in_peptide = ${params.number_mods}" >> comet.params
+    sed -i '/num_results/d' comet.params
+    echo "num_results = ${params.num_hits}" >> comet.params
+    sed -i '/precursor_charge/d' comet.params
+    echo "precursor_charge = ${params.min_charge} ${params.max_charge}" >> comet.params  
+    sed -i '/variable_mod0/d' comet.params
+    echo "${modout}" >> comet.params
+    """ 
+    // with a given comet file, all other paramter will be discarded
+  } else {
+    """
+    cp ${comet_param} comet.params
+    """
+  }
 }
 
-      
- 
+
 /*
  * STEP 3 - run comet
 */ 
-
 process db_search_comet {
-    publishDir "${params.outdir}"
-    input:
-     each mzml_file from mzml
-     file fasta from input_fasta
-     file comet_param from comet_param_file
+  label 'process_medium'
 
-    output:
-     file "${mzml_file.baseName}.pep.xml" into pepxml
-
-    script:
-     """
-     comet -P"${comet_param}" -N"${mzml_file.baseName}" -D"${fasta}" "${mzml_file}"
-     """
+  publishDir "${params.outdir}/comet", mode:'copy'
+  
+  input:
+  each mzml_file from mzmls_search_comet
+  file fasta from fasta_search_comet
+  file comet_param from comet_param_file
+  
+  output:
+  file "${mzml_file.baseName}.pep.xml" into pepxml
+  
+  script:
+  """
+  comet -P"${comet_param}" -N"${mzml_file.baseName}" -D"${fasta}" "${mzml_file}"
+  """
 }
 
 
 /*
  * STEP 4 - run PeptideProphet to validate PSMs
 */ 
-
 process run_peptideprophet {
-    publishDir "${params.outdir}"
-    input:
-     each pepxml_file from pepxml
-     file fasta from input_fasta2
+  label 'process_medium'
+  label 'process_single_thread'
 
-    output:
-     file "${pepxml_file.baseName}.interact.pep.xml" into (interact_pepxml, interact_pepxml2)
-     
-    script:
-     enzymemap = ["Trypsin": "", "Trypsin/P": "", "Lys_C": "-eN", "Lys_N": "-eL", "Arg_C": "-eN", "Asp_N": "-eA", "CNBr": "-eM", "Glu_C": "-eG", "PepsinA": "-eN", "Chymotrypsin": "-eC", "Unspecified": "-eN"]
-     enzyme = enzymemap[params.enzyme]
-
-    """
-    xinteract -N"${pepxml_file.baseName}.interact.pep.xml" -p"${params.fdr_peptide_threshold}" ${enzyme} -l"${params.peptide_min_length}" -THREADS=${task.cpus} -PPM -O -D"${fasta}" "${pepxml_file}"
-    """
+  publishDir "${params.outdir}/peptideprophet", mode:'copy'
+  
+  input:
+  each pepxml_file from pepxml
+  file fasta from fasta_peptideprophet
+  
+  output:
+  file "${pepxml_file.baseName}.interact.pep.xml" into interact_pepxml
+  
+  script:
+  enzymemap = ["Trypsin": "", "Trypsin/P": "", "Lys_C": "-eN", "Lys_N": "-eL", "Arg_C": "-eN", "Asp_N": "-eA", "CNBr": "-eM", "Glu_C": "-eG", "PepsinA": "-eN", "Chymotrypsin": "-eC", "Unspecified": "-eN"]
+  enzyme = enzymemap[params.enzyme]
+  
+  """
+  xinteract -N"${pepxml_file.baseName}.interact.pep.xml" -p"${params.fdr_peptide_threshold}" ${enzyme} -l"${params.peptide_min_length}" -THREADS=${task.cpus} -PPM -O -D"${fasta}" "${pepxml_file}"
+  """
 }
+
 
 /*
  * STEP 4 - run ProteinProphet to validate on protein level
 */ 
-
 process run_proteinprophet {
-    publishDir "${params.outdir}"
-    input:
-     file pepxml_file from interact_pepxml
-
-    output:
-     tuple file("${pepxml_file.baseName}.prot.xml"), file(pepxml_file) into (protxml, protxml2)
-     
-    script:
-    """
-    ProteinProphet "${pepxml_file}" "${pepxml_file.baseName}.prot.xml"
-    """
+  label 'process_medium'
+  label 'process_single_thread'
+  
+  publishDir "${params.outdir}/proteinprophet", mode:'copy', pattern:'*.prot.xml'
+  
+  input:
+  file pepxml_file from interact_pepxml
+  
+  output:
+  tuple file("${pepxml_file.baseName}.prot.xml"), file(pepxml_file) into protxml
+  
+  script:
+  """
+  ProteinProphet "${pepxml_file}" "${pepxml_file.baseName}.prot.xml"
+  """
 }
+
 
 /*
  * STEP 5 - run StPeter for protein quantification (label-free)
 */ 
-
 process run_stpeter {
-    publishDir "${params.outdir}"
-    input:
-     tuple file(protxml), file(pepxml) from protxml 
-     each file(fasta) from input_fasta3
-
-    output:
-     tuple file("${protxml.baseName}_stpeter.prot.xml"), file(pepxml) into stpeter_output
-     
-    script:
-    """
-    cp "${protxml}" stpeter_in.prot.xml
-    StPeter -f ${params.quantification_fdr} -t ${params.fragment_mass_tolerance}  stpeter_in.prot.xml
-    mv stpeter_in.prot.xml "${protxml.baseName}_stpeter.prot.xml"
-# -i option not available anymore:    StPeter -i -f ${params.quantification_fdr}  "${protxml}"
-    """
-    
+  label 'process_medium'
+  label 'process_single_thread'
+  
+  publishDir "${params.outdir}/stpeter", mode:'copy', pattern:'*.prot.xml'
+  
+  input:
+  tuple file(protxml), file(pepxml) from protxml 
+  each file(fasta) from fasta_stpeter
+  
+  output:
+  tuple file("${protxml.baseName}_stpeter.prot.xml"), file(pepxml) into stpeter_output
+  
+  script:
+  """
+  cp "${protxml}" stpeter_in.prot.xml
+  StPeter -f ${params.quantification_fdr} -t ${params.fragment_mass_tolerance} stpeter_in.prot.xml
+  # -i option not available anymore:    StPeter -i -f ${params.quantification_fdr}  "${protxml}"
+  mv stpeter_in.prot.xml "${protxml.baseName}_stpeter.prot.xml"
+  """
 }
+
 
 /*
  * STEP 6 - Convert StPeter prot.xml to csv
 */ 
-
 process convert_stpeter {
-    publishDir "${params.outdir}"
-    input:
-	tuple file(stpeter), file(pepxml) from stpeter_output
-
-    output:
-     tuple file("${stpeter.baseName}_prot.csv"), file("${stpeter.baseName}_pep.csv") into protquant
-     
-    script:
-    """
-    cp "${stpeter}" StPeterOut.prot.xml 
-    cp "${pepxml}" Sample.pep.xml
-    Rscript $baseDir/scripts/proxml2csv.R --xml=StPeterOut.prot.xml
-#    python $baseDir/scripts/protXML2csv.py 
-#    mv StPeterProts.csv "${stpeter.baseName}_prot.csv"
-#    mv StPeterPeps.csv "${stpeter.baseName}_pep.csv"
-    mv StPeterOut.prot.xml.csv "${stpeter.baseName}_pep.csv"
-    mv StPeterOut.prot.xml_summary.csv "${stpeter.baseName}_prot.csv"
-    """
-    
+  label 'process_low'
+  label 'process_single_thread'
+  
+  publishDir "${params.outdir}/", mode:'copy'
+  
+  input:
+  tuple file(stpeter), file(pepxml) from stpeter_output
+  
+  output:
+  tuple file("${stpeter.baseName}_prot.csv"), file("${stpeter.baseName}_pep.csv") into protquant
+  
+  script:
+  """
+  cp "${stpeter}" StPeterOut.prot.xml 
+  cp "${pepxml}" Sample.pep.xml
+  Rscript $baseDir/scripts/proxml2csv.R --xml=StPeterOut.prot.xml
+  #    python $baseDir/scripts/protXML2csv.py 
+  #    mv StPeterProts.csv "${stpeter.baseName}_prot.csv"
+  #    mv StPeterPeps.csv "${stpeter.baseName}_pep.csv"
+  mv StPeterOut.prot.xml.csv "${stpeter.baseName}_pep.csv"
+  mv StPeterOut.prot.xml_summary.csv "${stpeter.baseName}_prot.csv"
+  """
 }
+
 
 /*
  * STEP 7 - merge files according to experimental design
 */ 
-
 process run_merge_quant {
-    publishDir "${params.outdir}"
-    input:
-     file csv_files from protquant.collect()
-     val raw_files from input_raw2.collect()
-     file exp_design_file from input_exp_design.ifEmpty(file("none"))
-
-    output:
-     file "all_prot_quant_merged.csv" into allprotquant
-     
-    script:
-     // no file provided
-if (exp_design_file.getName() == "none") {
-       expdesign_text = "raw_file\texp_condition"
-       for( int i=0; i<raw_files.size(); i++ ) {
-         expdesign_text += "\n${raw_files[i].name}\tMain"
-       } 
+  label 'process_medium'
+  label 'process_single_thread'
+  
+  publishDir "${params.outdir}/", mode:'copy'
+  
+  input:
+  file csv_files from protquant.collect()
+  val raw_files from raws_merge_quant.collect()
+  file exp_design_file from input_exp_design.ifEmpty(file("none"))
+  
+  output:
+  file "all_prot_quant_merged.csv" into allprotquant
+  
+  script:
+  if (exp_design_file.getName() == "none") {
+    // no experimental design file provided
+    expdesign_text = "raw_file\texp_condition"
+    for( int i=0; i<raw_files.size(); i++ ) {
+      expdesign_text += "\n${raw_files[i].name}\tMain"
+    }
     """
-       touch exp_design.txt  
-       echo "${expdesign_text}" >> exp_design.txt
-       R CMD BATCH $baseDir/scripts/MergeOutput.R
+    touch exp_design.txt  
+    echo "${expdesign_text}" >> exp_design.txt
+    R CMD BATCH $baseDir/scripts/MergeOutput.R
     """
-     } else {
+  } else {
     """
     cp "${exp_design_file}" exp_design.txt
-     R CMD BATCH $baseDir/scripts/MergeOutput.R
-
+    R CMD BATCH $baseDir/scripts/MergeOutput.R
     """
-     }
-
-    
+    }
 }
+
 
 workflow.onComplete {
     log.info ( workflow.success ? "\nDone! Open the files in the following folder --> $params.outdir\n" : "Oops .. something went wrong" )
 }
-
-   
