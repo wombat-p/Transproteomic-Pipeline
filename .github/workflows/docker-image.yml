@@ -35,7 +35,7 @@ jobs:
       run: docker build . --file Dockerfile --tag wombatp/${WORKFLOW}:dev
 
     - name: Build Docker image (release)
-      working-directory: Nextflow
+      working-directory: Nextflow/docker
       if: ${{ github.event_name == 'release' }}
       run: |
           version=${{ github.ref }}
