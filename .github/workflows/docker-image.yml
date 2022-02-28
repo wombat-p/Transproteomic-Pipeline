@@ -44,7 +44,7 @@ jobs:
           docker build . --file Dockerfile --tag wombatp/${WORKFLOW}:${version}
 
     - name: Push Docker image to DockerHub (dev)
-      if: ${{ github.event_name == 'push' ||  github.event_name == 'pull_request' }}
+      if: ${{ github.event_name == 'push' }}
       run: |
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
           docker push wombatp/${WORKFLOW}:dev
