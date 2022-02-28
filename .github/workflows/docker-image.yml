@@ -35,7 +35,7 @@ jobs:
       run: docker build . --file Dockerfile --tag wombatp/${WORKFLOW}:dev
 
     - name: Build Docker image (release)
-      working-directory: Nextflow
+      working-directory: Nextflow/docker
       if: ${{ github.event_name == 'release' }}
       run: |
           version=${{ github.ref }}
@@ -44,7 +44,7 @@ jobs:
           docker build . --file Dockerfile --tag wombatp/${WORKFLOW}:${version}
 
     - name: Push Docker image to DockerHub (dev)
-      if: ${{ github.event_name == 'push' ||  github.event_name == 'pull_request' }}
+      if: ${{ github.event_name == 'push' }}
       run: |
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
           docker push wombatp/${WORKFLOW}:dev
@@ -78,7 +78,7 @@ jobs:
        uses: actions/checkout@v2
 
      - name: Build new docker image
-       working-directory: Nextflow
+       working-directory: Nextflow/docker
        run: docker build --no-cache . -t wombatp/${WORKFLOW}:latest
 
      - name: Push Docker image to DockerHub (release)
@@ -90,4 +90,3 @@ jobs:
           version=${version[2]}
           docker tag wombatp/${WORKFLOW}:latest wombatp/${WORKFLOW}:${version}
           docker push wombatp/${WORKFLOW}:${version}
-
