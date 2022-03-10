@@ -420,6 +420,7 @@ process run_merge_quant {
   
   output:
   file "all_prot_quant_merged.csv" into allprotquant
+  file "all_pep_quant_merged.csv" into allpepquant
   
   script:
   if (exp_design_file.getName() == "none") {
