@@ -1,0 +1,81 @@
+
+R version 4.1.3 (2022-03-10) -- "One Push-Up"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ######################################################################
+> # AUTH  Jeff Jones
+> # DATE  2018.07.23
+> # DESC  parse pepXML post TPP: xtandem > Tandem2XML > PeptideProphet
+> #
+> ######################################################################
+> 
+> rm(list=ls())
+> require(XML)
+Loading required package: XML
+> library(progress)
+> options(warn=-1)
+> 
+> help_text <- "
++  NAME
++     pepxml2csv.R
++ 
++  SYNOPSIS
++     pepxml2csv.R --xml=<path_pepxml> --fdr=0.05 --rank=1
++ 
++  DESCRIPTION
++     extract peptide id data from PeptideProphet pepXML files for downstream analysis
++ 
++  COMMAND LINE
++ 
++     --xml <path_pepxml>
++ 
++     --csv <path_csv> (optional: path_pepxml.csv)
++ 
++     --fdr false discovery rate value between 0-1 (default: 0.01 ~ 1% FDR) 
++ 
++     --rank max rank desired value >= 1 (default: 1) assumes user only wants highest ranking hit
++ 
++  EXAMPLE
++ 
++     Rscript pepxml2csv.R --xml=<path_to.pepXML>
++ 
++ "
+> 
+> ###############################################################################
+> # USER INPUT
+> path_xml                      <- NULL
+> path_csv                      <- NULL
+> fdr_cutf                      <- 0.01
+> max_rank                      <- 1
+> 
+> for (arg in commandArgs()){
++     arg_value <- as.character(sub("--[a-z]*\\=", "", arg))
++     if( grepl("--xml", arg) ) path_xml <- arg_value
++     if( grepl("--csv", arg) ) path_csv <- arg_value
++     if( grepl("--fdr", arg) ) fdr_cutf <- arg_value
++     if( grepl("--rank", arg) ) max_rank <- arg_value
++     if( grepl("--help", arg) ) stop(help_text)
++ }
+> 
+> ###############################################################################
+> # INPUT VALIDATION
+> message <- NULL
+> if(is.null(path_xml)) message <- stop("ERROR\n", "  no mzXML file declared\n")
+Error: ERROR
+  no mzXML file declared
+Execution halted

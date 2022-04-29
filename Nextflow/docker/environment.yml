@@ -10,6 +10,7 @@ dependencies:
 #  - tpp=5.0.0
   - comet-ms=2019014
   - r-progress=1.2.2
+  - r-dplyr=1.0.9
   - r-xml=3.99-0.8
   - r-stringi=1.7.6
   - pyteomics=4.4.0
