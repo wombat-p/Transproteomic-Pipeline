@@ -28,7 +28,7 @@ keep_pep_columns_all <- c("fileName","pct_spectrum_ids","confidence","initial_pr
                           "StPeterQuant_peptide.SC")
 
 prot_convert_names <- c(protein_group="protein_name", number_of_peptides="total_number_distinct_peptides", 
-                        abundances="Normalized.spectral.index")
+                        abundance="Normalized.spectral.index")
 
 pep_convert_names <- c(modified_peptide="modified_peptide", protein_group="protein_name", charge="StPeterQuant_peptide.charge", abundance="StPeterQuant_peptide.SI")
 
@@ -93,6 +93,10 @@ library(dplyr)
 stand_pep_quant <- merge(stand_pep_quant %>% group_by(modified_peptide) %>% summarize_at(c("protein_group","charge"), paste, collapse=";"), 
       stand_pep_quant %>% group_by(modified_peptide) %>% summarize_at(grep("^abundance", colnames(stand_pep_quant), value=T), sum, na.rm=T), 
       by=1)
+
+for (c in grep("^abundance", colnames(stand_pep_quant))) {
+  stand_pep_quant[stand_pep_quant[,c] == 0, c] <- NA
+}
 
 write.csv(stand_prot_quant, "stand_prot_quant_merged.csv", row.names=F)
 write.csv(stand_pep_quant, "stand_pep_quant_merged.csv", row.names=F)

@@ -11,6 +11,7 @@ nextflow.enable.dsl=1
 ----------------------------------------------------------------------------------------
 */
 
+import groovy.json.JsonOutput
 
 def helpMessage() {
     log.info nfcoreHeader()
@@ -150,7 +151,7 @@ input_raw.into { raws_convert; raws_merge_quant }
  * Create a channel for fasta file
  */
 input_fasta = Channel.fromPath( params.fasta )
-input_fasta.into { fasta_search_comet; fasta_peptideprophet; fasta_stpeter }
+input_fasta.into { fasta_search_comet; fasta_peptideprophet; fasta_stpeter; fasta_qc }
 
 /*
  * Create a channel for comet parameter file
@@ -418,6 +419,7 @@ process run_merge_quant {
   file "all_pep_quant_merged.csv" into allpepquant
   file "stand_prot_quant_merged.csv" into stdprotquant
   file "stand_pep_quant_merged.csv" into stdpepquant
+  file "exp_design.txt" into expdesign
   
   script:
   if (exp_design_file.getName() == "none") {
@@ -438,6 +440,36 @@ process run_merge_quant {
     """
     }
 }
+
+/*
+ * STEP 8 - Some QC
+*/
+process run_final_qc {
+  label 'process_medium'
+  label 'process_single_thread'
+  
+  publishDir "${params.outdir}/", mode:'copy'
+  
+    input:
+        val foo from JsonOutput.prettyPrint(JsonOutput.toJson(params))
+	file exp_design_file from expdesign
+	file std_prot_file from stdprotquant
+	file std_pep_file from stdpepquant
+	file fasta_file from fasta_qc
+ 
+  output:
+   file "params.json" into parameters
+   file "benchmarks.json" into benchmarks
+  
+  script:
+  """
+  echo '$foo' > params.json
+  cp "${fasta_file}" database.fasta
+  R CMD BATCH $baseDir/scripts/CalcBenchmarks.R
+
+  """
+}
+
 
 
 workflow.onComplete {
