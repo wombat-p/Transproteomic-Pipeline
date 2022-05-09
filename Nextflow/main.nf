@@ -4,10 +4,14 @@
                          nf-core/tpp_workflow
 ========================================================================================
 (NOT YET A nf-core!)
- #### Homepage / Documentation
+
+nextflow.enable.dsl=1
+
+#### Homepage / Documentation
 ----------------------------------------------------------------------------------------
 */
 
+import groovy.json.JsonOutput
 
 def helpMessage() {
     log.info nfcoreHeader()
@@ -40,7 +44,7 @@ def helpMessage() {
       --num_hits                        Number of reported hits
       --min_charge                      Minimal precursor charge 
       --max_charge                      Maximal precursor charge 
-      --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
+      --skip_decoy_generation           Use a fasta database that already includes decoy sequences
       --comet_param_file                Parameter file for comet database search. This will overwrite all other parameters for the comet search
       
       
@@ -85,15 +89,15 @@ params.outdir = params.outdir ?: { log.warn "No output directory provided. Will 
 //MS params
 params.peptide_min_length = 8
 //params.peptide_max_length = 12
-params.fragment_mass_tolerance = 0.1
-params.precursor_mass_tolerance = 5
-params.fragment_bin_offset = 0
+params.fragment_mass_tolerance = 1.0005
+params.precursor_mass_tolerance = 20
+params.fragment_bin_offset = 0.4
 params.fdr_peptide_threshold = 0.01
 params.number_mods = 3
 
 params.comet_param_file = "none"
 
-params.num_hits = 1
+params.num_hits = 100
 params.pick_ms_levels = 2
 params.run_centroidisation = false
 
@@ -102,7 +106,7 @@ params.max_charge = 3
 params.activation_method = 'ALL'
 
 params.enzyme = 'Trypsin'
-params.miscleavages = 1
+params.miscleavages = 2
 params.fixed_mods = 'Carbamidomethylation of C'
 params.variable_mods = 'Oxidation of M'
 
@@ -147,7 +151,7 @@ input_raw.into { raws_convert; raws_merge_quant }
  * Create a channel for fasta file
  */
 input_fasta = Channel.fromPath( params.fasta )
-input_fasta.into { fasta_search_comet; fasta_peptideprophet; fasta_stpeter }
+input_fasta.into { fasta_search_comet; fasta_peptideprophet; fasta_stpeter; fasta_qc }
 
 /*
  * Create a channel for comet parameter file
@@ -183,7 +187,7 @@ process convert_raw_mzml {
   file rawfile from raws_convert
   
   output:
-  file "${rawfile.baseName}.mzML" into mzmls_search_comet
+  file "${rawfile.baseName}.mzML" into (mzmls_search_comet, mzmls_peptideprophet)
   
   script:
   """
@@ -220,54 +224,44 @@ process set_comet_configuration {
     modmap = ["Oxidation of M": "15.9949 M 0 3 -1 0 0 0.0", "Phosphorylation of STY": "79.966331 STY 0 3 -1 0 0 97.976896", "Acetylation of K": "42.010565 K 0 3 -1 0 0", "Acetylation of protein N-term": " 42.010565 n 0 3 0 0 0", "none": "0.0 X 0 3 -1 0"]
     mods = params.variable_mods.split(",")  
     modout = ""
-    for (int i=0; i<10; i++) {
-      if(mods.size() > i ) {
-        tmod =  modmap[mods[i]]
+    for (int i=1; i<9; i++) {
+      if(mods.size() > i-1 ) {
+        tmod =  modmap[mods[i-1]]
         if (tmod != null) {
-          modout += "variable_mod0" + i + " = " + tmod + "\n"
+          modout += "variable_mod0" + i + " = " + tmod + "\\n"
         } else {
-          modout += "variable_mod0" + i + " = " + modmap["none"] + "\n"
+          modout += "variable_mod0" + i + " = " + modmap["none"] + "\\n"
         }
       } else {
-        modout += "variable_mod0" + i + " = " + modmap["none"] + "\n"
+        modout += "variable_mod0" + i + " = " + modmap["none"] + "\\n"
       }
     }
     
     """
     comet -p
     mv comet.params.new comet.params
-    sed -i '/decoy_search/d' comet.params
-    if [ "${skip_decoy}" = "${ttrue}" ]
+    if [ "${skip_decoy}" = "${true}" ]
     then
-      echo "decoy_search = 0" >> comet.params
+      sed -i 's/^decoy_search.*/decoy_search = 0/' comet.params
     else
-      echo "decoy_search = 1" >> comet.params
+      sed -i 's/^decoy_search.*/decoy_search = 1/' comet.params
     fi
     # given in ppm
-    sed -i '/num_threads/d' comet.params
-    echo "num_threads = ${task.cpus}" >> comet.params
-    sed -i '/peptide_mass_tolerance/d' comet.params
-    echo "peptide_mass_tolerance = ${params.precursor_mass_tolerance}" >> comet.params
-    sed -i '/search_enzyme_number/d' comet.params
-    echo "search_enzyme_number = ${enzyme}" >> comet.params
+    sed -i 's/^num_threads.*/'"num_threads = ${task.cpus}"/ comet.params
+    sed -i 's/p^eptide_mass_tolerance.*/'"peptide_mass_tolerance = ${params.precursor_mass_tolerance}"/ comet.params
+    sed -i 's/^search_enzyme_number.*/'"search_enzyme_number = ${enzyme}"/ comet.params
     # given in da and assuming high resolution
-    sed -i '/fragment_bin_tol/d' comet.params
-    sed -i '/fragment_bin_offset/d' comet.params
-    echo "fragment_bin_tol = ${params.fragment_mass_tolerance}" >> comet.params
-    echo "fragment_bin_offset = 0.0" >> comet.params
+    sed -i 's/^fragment_bin_tol.*/'"fragment_bin_tol = ${params.fragment_mass_tolerance}"/ comet.params
+    sed -i 's/^fragment_bin_offset.*/'"fragment_bin_offset = 0.0"/ comet.params
     # mass range
-    sed -i '/activation_method/d' comet.params
-    echo "activation_method = ${params.activation_method}" >> comet.params
-    sed -i '/allowed_missed_cleavage/d' comet.params
-    echo "allowed_missed_cleavage = ${params.miscleavages}" >> comet.params
-    sed -i '/max_variable_mods_in_peptide/d' comet.params
-    echo "max_variable_mods_in_peptide = ${params.number_mods}" >> comet.params
-    sed -i '/num_results/d' comet.params
-    echo "num_results = ${params.num_hits}" >> comet.params
-    sed -i '/precursor_charge/d' comet.params
-    echo "precursor_charge = ${params.min_charge} ${params.max_charge}" >> comet.params  
-    sed -i '/variable_mod0/d' comet.params
-    echo "${modout}" >> comet.params
+    sed -i 's/^activation_method.*/'"activation_method = ${params.activation_method}"/ comet.params
+    sed -i 's/^allowed_missed_cleavage.*/'"allowed_missed_cleavage = ${params.miscleavages}"/  comet.params
+    sed -i 's/^max_variable_mods_in_peptide.*/'"max_variable_mods_in_peptide = ${params.number_mods}"/ comet.params
+    sed -i 's/^num_results.*/'"num_results = ${params.num_hits}"/ comet.params
+    sed -i 's/^precursor_charge.*/'"precursor_charge = ${params.min_charge} ${params.max_charge}"/  comet.params  
+    insert_line=\$(grep -n variable_mod0 comet.params | grep -Eo '^[^:]+' | head -n1)
+    sed -i '/^variable_mod0/d' comet.params
+    sed -i "\$insert_line i ${modout}" comet.params
     """ 
     // with a given comet file, all other paramter will be discarded
   } else {
@@ -313,6 +307,7 @@ process run_peptideprophet {
   input:
   each pepxml_file from pepxml
   file fasta from fasta_peptideprophet
+  file mzml from mzmls_peptideprophet.collect()
   
   output:
   file "${pepxml_file.baseName}.interact.pep.xml" into interact_pepxml
@@ -322,6 +317,7 @@ process run_peptideprophet {
   enzyme = enzymemap[params.enzyme]
   
   """
+  ls ${mzml}
   xinteract -N"${pepxml_file.baseName}.interact.pep.xml" -p"${params.fdr_peptide_threshold}" ${enzyme} -l"${params.peptide_min_length}" -THREADS=${task.cpus} -PPM -O -D"${fasta}" "${pepxml_file}"
   """
 }
@@ -421,6 +417,9 @@ process run_merge_quant {
   output:
   file "all_prot_quant_merged.csv" into allprotquant
   file "all_pep_quant_merged.csv" into allpepquant
+  file "stand_prot_quant_merged.csv" into stdprotquant
+  file "stand_pep_quant_merged.csv" into stdpepquant
+  file "exp_design.txt" into expdesign
   
   script:
   if (exp_design_file.getName() == "none") {
@@ -441,6 +440,36 @@ process run_merge_quant {
     """
     }
 }
+
+/*
+ * STEP 8 - Some QC
+*/
+process run_final_qc {
+  label 'process_medium'
+  label 'process_single_thread'
+  
+  publishDir "${params.outdir}/", mode:'copy'
+  
+    input:
+        val foo from JsonOutput.prettyPrint(JsonOutput.toJson(params))
+	file exp_design_file from expdesign
+	file std_prot_file from stdprotquant
+	file std_pep_file from stdpepquant
+	file fasta_file from fasta_qc
+ 
+  output:
+   file "params.json" into parameters
+   file "benchmarks.json" into benchmarks
+  
+  script:
+  """
+  echo '$foo' > params.json
+  cp "${fasta_file}" database.fasta
+  R CMD BATCH $baseDir/scripts/CalcBenchmarks.R
+
+  """
+}
+
 
 
 workflow.onComplete {
