@@ -39,18 +39,17 @@ for (file in exp_design[,1]) {
   t_pep_quant <- read.csv(sub(".raw", ".pep.interact.pep.prot_stpeter.prot_pep.csv", file))
   # filter out non-quantified peptides
   t_pep_quant <- t_pep_quant[!is.na(t_pep_quant[,"StPeterQuant_peptide.sequence"]), ]
-  
-#  t_rownames <-  apply(t_quant[, c("protein_name","indistinguishable_proteins")], 1, paste, collapse=";")
+  # remove sporadic multiple entries (not sure why they appear, seem to be some modified peptides)
+  t_pep_quant <- t_pep_quant[!duplicated(apply(t_pep_quant[, c("modified_peptide","charge")], 1, paste, collapse=";")), ]
+    
   t_pep_rownames <-  apply(t_pep_quant[, c("modified_peptide","charge")], 1, paste, collapse=";")
-  # some formatting of the secondary proteins as they appear in a json like format
-#  t_rownames <- gsub("\\[|\\]|\\'", "", t_rownames)
-#  rownames(t_quant) <- gsub(", ",";", t_rownames)
+  
   rownames(t_pep_quant) <- t_pep_rownames
   rownames(t_quant) <- t_quant[,"protein_name"]
   t_prot_info <- t_quant[, keep_columns_once, drop=F]
   t_pep_info <- t_pep_quant[, keep_pep_columns_once]
-  quant_out[[file]] <- cbind(t_quant[,keep_columns_all], stringsAsFactors=F)
-  quant_pep_out[[file]] <- cbind(t_pep_quant[,keep_pep_columns_all], stringsAsFactors=F)
+  quant_out[[file]] <- cbind(rownames(t_quant), t_quant[,keep_columns_all], stringsAsFactors=F)
+  quant_pep_out[[file]] <- cbind(rownames(t_pep_quant), t_pep_quant[,keep_pep_columns_all], stringsAsFactors=F)
   prot_info <- rbind(prot_info, t_prot_info)
   pep_info <- rbind(pep_info, t_pep_info)
   colnames(quant_out[[file]]) <- paste(colnames(quant_out[[file]]), exp_design[file,2], exp_design[file,3], sep="_")
@@ -58,8 +57,8 @@ for (file in exp_design[,1]) {
 }
 prot_info <- unique(prot_info)
 pep_info <- unique(pep_info)
-all_quant <- Reduce(function(x, y) merge(x, y, by=0, all=TRUE), quant_out)
-all_pep_quant <- Reduce(function(x, y) merge(x, y, by=0, all=TRUE), quant_pep_out)
+all_quant <- Reduce(function(x, y) merge(x, y, by=1, all=TRUE), quant_out)
+all_pep_quant <- Reduce(function(x, y) merge(x, y, by=1, all=TRUE), quant_pep_out)
 all_quant <- cbind(prot_info[all_quant[,1],], all_quant[,2:ncol(all_quant)])
 all_pep_quant <- cbind(pep_info[all_pep_quant[,1],], all_pep_quant[,2:ncol(all_pep_quant)])
 
