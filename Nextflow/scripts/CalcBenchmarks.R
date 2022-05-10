@@ -147,12 +147,12 @@ qs <- quantile(tpepquant, probs = seq(0,1,0.05), na.rm=T)
 Quantification[["DynamicPeptideRange"]] <- qs[length(qs)-1] / qs[2]
 
 # number of protein groups with at least 50% coverage
-tprotquant <- StatsProt[, all_pep_samples]
+tprotquant <- StatsProt[, all_prot_samples]
 Quantification[["NumberOfProteinGroups"]] <- sum(rowSums(!is.na(tprotquant)) >= 0.5*ncol(tprotquant))
 
 # 5% top vs. 5% bottom quantile
 qs <- quantile(tprotquant, probs = seq(0,1,0.05), na.rm=T)
-Quantification[["DynamicProteinRange"]] <- qs[length(qs)-1] / qs[2]
+Quantification[["DynamicProteinRange"]] <- 2^(qs[length(qs)-1] - qs[2])
 
 Performance[["Quantification"]] <- Quantification
 
@@ -186,7 +186,7 @@ Performance[["Digestion"]] <- Digestion
 ## PTMs
 PTMs=list()
 # percentages of different PTMs
-mods <- str_extract_all( StatsPep$modified_peptide, "\\[[0-9]*\\]|\\([a-z,A-Z]*\\)")
+mods <- str_extract_all( StatsPep$modified_peptide, "\\[[0-9]*\\]|\\([a-z,A-Z]*\\)|\\<[a-z,A-Z]*\\>")
 PTMs[["PTMDistribution"]] <- as.data.frame(table(unlist(mods)))
 # How many PTMs per peptide
 PTMs[["PTMOccupancy"]] <- as.data.frame(table(sapply(mods, length)))
