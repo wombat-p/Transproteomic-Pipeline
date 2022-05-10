@@ -49,8 +49,8 @@ for (file in exp_design[,1]) {
   rownames(t_quant) <- t_quant[,"protein_name"]
   t_prot_info <- t_quant[, keep_columns_once, drop=F]
   t_pep_info <- t_pep_quant[, keep_pep_columns_once]
-  quant_out[[file]] <- cbind(t_quant[,keep_columns_all], stringsAsFactors=F)
-  quant_pep_out[[file]] <- cbind(t_pep_quant[,keep_pep_columns_all], stringsAsFactors=F)
+  quant_out[[file]] <- cbind(rownames(t_quant), t_quant[,keep_columns_all], stringsAsFactors=F)
+  quant_pep_out[[file]] <- cbind(rownames(t_pep_quant), t_pep_quant[,keep_pep_columns_all], stringsAsFactors=F)
   prot_info <- rbind(prot_info, t_prot_info)
   pep_info <- rbind(pep_info, t_pep_info)
   colnames(quant_out[[file]]) <- paste(colnames(quant_out[[file]]), exp_design[file,2], exp_design[file,3], sep="_")
@@ -58,8 +58,8 @@ for (file in exp_design[,1]) {
 }
 prot_info <- unique(prot_info)
 pep_info <- unique(pep_info)
-all_quant <- Reduce(function(x, y) merge(x, y, by=0, all=TRUE), quant_out)
-all_pep_quant <- Reduce(function(x, y) merge(x, y, by=0, all=TRUE), quant_pep_out)
+all_quant <- Reduce(function(x, y) merge(x, y, by=1, all=TRUE), quant_out)
+all_pep_quant <- Reduce(function(x, y) merge(x, y, by=1, all=TRUE), quant_pep_out)
 all_quant <- cbind(prot_info[all_quant[,1],], all_quant[,2:ncol(all_quant)])
 all_pep_quant <- cbind(pep_info[all_pep_quant[,1],], all_pep_quant[,2:ncol(all_pep_quant)])
 
