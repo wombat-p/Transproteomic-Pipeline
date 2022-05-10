@@ -108,10 +108,10 @@ Identification[["PeptideCoverage"]] <- sum(rowSums(is.na(StatsPep[,all_pep_sampl
 all_prot_samples <- grep("^abundance_", colnames(StatsProt))
 Identification[["ProteinCoverage"]] <- sum(rowSums(is.na(StatsProt[,all_prot_samples,drop=F])) == 0)
 
-# distribution of peptides per protein group
-tab <- table(unlist(StatsProt[,all_pep_samples,drop=F]))
+# distribution of peptides per protein group (only 1-10)
+tab <- table(unlist(StatsProt[,grep("^number_of_peptides_", colnames(StatsProt)),drop=F]))
 
-Identification[["PeptidesPerProtein"]] <- as.data.frame(tab)
+Identification[["PeptidesPerProtein"]] <- as.data.frame(tab[1:10])
 Performance[["Identification"]] <- Identification
 
 ## Quantification
@@ -219,4 +219,4 @@ Parameter[["Quantification"]] <- Quantification
 Functionality[["Parameter"]] <- Parameter
 Benchmarks[["Functionality"]] <- Functionality
 cat("## Done\n")
-write_json(toJSON(Benchmarks, pretty=T), path="benchmarks.json")
+write_json(Benchmarks, path="benchmarks.json")
