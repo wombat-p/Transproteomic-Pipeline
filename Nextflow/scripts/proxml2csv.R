@@ -196,10 +196,10 @@ for ( prot_i in w_protg ){
                 for (mod in 1:length(w_mods)) {
                     mod_info <- rbind(mod_info, unlist(peptide$modification_info[mod]))
                 }
-                if (length(mod_info) > 1) {
+                if (length(unlist(mod_info)) > 1) {
                 modified_peptide <- unlist(stri_sub_replace_all(peptide_vals['peptide_sequence'], from=as.numeric(mod_info[,1])+1,
                                      to=as.numeric(mod_info[,1]), 
-                                     replacement=paste0("[",as.numeric(mod_info[,2])),"]"))
+                                     replacement=paste0("[",as.numeric(mod_info[,2]),"]")))
                 }
             }
             peptide_vals <- c(peptide_vals, modified_peptide=modified_peptide)
