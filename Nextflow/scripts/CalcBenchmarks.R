@@ -186,7 +186,7 @@ Performance[["Digestion"]] <- Digestion
 ## PTMs
 PTMs=list()
 # percentages of different PTMs
-mods <- str_extract_all( StatsPep$modified_peptide, "\\[[0-9]*\\]|\\([a-z,A-Z]*\\)|\\<[a-z,A-Z]*\\>")
+mods <- str_extract_all( StatsPep$modified_peptide, "\\[[0-9,\\.]*\\]|\\([a-z,A-Z]*\\)|\\<[a-z,A-Z]*\\>")
 PTMs[["PTMDistribution"]] <- as.data.frame(table(unlist(mods)))
 # How many PTMs per peptide
 PTMs[["PTMOccupancy"]] <- as.data.frame(table(sapply(mods, length)))
