@@ -119,6 +119,7 @@ if (params.skip_decoy_generation) {
 
 params.quantification_fdr = 0.01
 params.quantification_min_prob = 0
+params.min_num_peptides = 2
 
 params.experiment_design = "none"
 
@@ -390,7 +391,7 @@ process convert_stpeter {
   """
   cp "${stpeter}" StPeterOut.prot.xml 
   cp "${pepxml}" Sample.pep.xml
-  Rscript $baseDir/scripts/proxml2csv.R --xml=StPeterOut.prot.xml
+  Rscript $baseDir/scripts/proxml2csv.R --xml=StPeterOut.prot.xml --fdr=${params.quantification_fdr} --npep ${params.min_num_peptides}
   #    python $baseDir/scripts/protXML2csv.py 
   #    mv StPeterProts.csv "${stpeter.baseName}_prot.csv"
   #    mv StPeterPeps.csv "${stpeter.baseName}_pep.csv"

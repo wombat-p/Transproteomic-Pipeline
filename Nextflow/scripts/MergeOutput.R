@@ -39,12 +39,11 @@ for (file in exp_design[,1]) {
   t_pep_quant <- read.csv(sub(".raw", ".pep.interact.pep.prot_stpeter.prot_pep.csv", file))
   # filter out non-quantified peptides
   t_pep_quant <- t_pep_quant[!is.na(t_pep_quant[,"StPeterQuant_peptide.sequence"]), ]
-  
-#  t_rownames <-  apply(t_quant[, c("protein_name","indistinguishable_proteins")], 1, paste, collapse=";")
+  # remove sporadic multiple entries (not sure why they appear, seem to be some modified peptides)
+  t_pep_quant <- t_pep_quant[!duplicated(apply(t_pep_quant[, c("modified_peptide","charge")], 1, paste, collapse=";")), ]
+    
   t_pep_rownames <-  apply(t_pep_quant[, c("modified_peptide","charge")], 1, paste, collapse=";")
-  # some formatting of the secondary proteins as they appear in a json like format
-#  t_rownames <- gsub("\\[|\\]|\\'", "", t_rownames)
-#  rownames(t_quant) <- gsub(", ",";", t_rownames)
+  
   rownames(t_pep_quant) <- t_pep_rownames
   rownames(t_quant) <- t_quant[,"protein_name"]
   t_prot_info <- t_quant[, keep_columns_once, drop=F]
