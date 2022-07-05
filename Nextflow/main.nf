@@ -418,8 +418,8 @@ process run_merge_quant {
   output:
   file "all_prot_quant_merged.csv" into allprotquant
   file "all_pep_quant_merged.csv" into allpepquant
-  file "stand_prot_quant_merged.csv" into stdprotquant
-  file "stand_pep_quant_merged.csv" into stdpepquant
+  file "stand_prot_quant_merged.csv" into (stdprotquant_qc, stdprotquant_rots)
+  file "stand_pep_quant_merged.csv" into (stdpepquant_qc, stdpepquant_rots)
   file "exp_design.txt" into expdesign
   
   script:
@@ -451,26 +451,68 @@ process run_final_qc {
   
   publishDir "${params.outdir}/", mode:'copy'
   
-    input:
-        val foo from JsonOutput.prettyPrint(JsonOutput.toJson(params))
-	file exp_design_file from expdesign
-	file std_prot_file from stdprotquant
-	file std_pep_file from stdpepquant
-	file fasta_file from fasta_qc
- 
+  input:
+  val foo from JsonOutput.prettyPrint(JsonOutput.toJson(params))
+  file exp_design_file from expdesign
+  file std_prot_file from stdprotquant_qc
+  file std_pep_file from stdpepquant_qc
+  file fasta_file from fasta_qc
+  
   output:
-   file "params.json" into parameters
-   file "benchmarks.json" into benchmarks
+  file "params.json" into parameters
+  file "benchmarks.json" into benchmarks
   
   script:
   """
   echo '$foo' > params.json
   cp "${fasta_file}" database.fasta
   R CMD BATCH $baseDir/scripts/CalcBenchmarks.R
-
   """
 }
 
+
+/*
+ * STEP 9a - run ROTS an proteins
+ */ 
+process run_rots_analysis_proteins {
+  label 'process_medium'
+  label 'process_single_thread'
+
+  publishDir "${params.outdir}/", mode:'copy'
+
+  input:
+  file protein_quants from stdprotquant_rots
+
+  output:
+  file "all_prot_quant_ROTS.csv" into protein_quants_rots
+
+  script:
+  """
+  R CMD BATCH $baseDir/scripts/rots_analysis_proteins.R
+  """
+}
+
+
+/*
+ * STEP 9b - run ROTS an peptides
+ */ 
+process run_rots_analysis_peptides {
+  label 'process_medium'
+  label 'process_single_thread'
+
+  publishDir "${params.outdir}/", mode:'copy'
+
+  input:
+  file peptide_quants from stdpepquant_rots
+
+  output:
+  file "all_pep_quant_ROTS.csv" into peptide_quants_rots
+
+  script:
+  """
+  R CMD BATCH $baseDir/scripts/rots_analysis_peptides.R
+  """
+}
 
 
 workflow.onComplete {
