@@ -17,3 +17,5 @@ dependencies:
   - r-stringr=1.4.0
   - pyteomics=4.4.0
   - r-matrixStats=0.62.0
+  - bioconductor-limma=3.50.1
+  - bioconductor-rots=1.22.0
