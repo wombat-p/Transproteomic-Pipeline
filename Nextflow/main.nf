@@ -57,8 +57,9 @@ def helpMessage() {
       --quantification_fdr              FDR threshold to accept peptides for quantification
       --quantification_min_prob         Specify a minimum probability cut off for quantification
       --experiment_design               Text-file containing 2 columns: first with raw file names and second with names for experimental conditions
-
-
+    
+    Run statistics
+      --run_statistics			            Either true or false (default true)
           
     Other options:
       --outdir                          The output directory where the results will be saved
@@ -123,6 +124,8 @@ params.min_num_peptides = 2
 
 params.experiment_design = "none"
 
+params.run_statistics = true
+
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -163,7 +166,6 @@ if ((params.comet_param_file != "none") && !(file(params.comet_param_file).exist
   log.error "Specified comet parameter file does not exit"; exit 1
 }
 
-
 /* 
  * Create a channel for experimental design file
  */
@@ -172,6 +174,16 @@ if (params.experiment_design == "none") {
   log.warn "No experimental design! All raw files will be considered being from the one and the same experimental condition."
 } else if(!(file(params.experiment_design).exists())) {
   log.error "File with experimental design does not exit"; exit 1  
+}
+
+/*
+ * set up param_run_statistics
+ */
+if (params.run_statistics && (params.experiment_design == "none")) {
+  log.warn "Without experimental design, the ROTS statistics are deactivated as well."
+  param_run_statistics = false
+} else {
+  param_run_statistics = params.run_statistics
 }
 
 
@@ -480,6 +492,9 @@ process run_rots_analysis_proteins {
 
   publishDir "${params.outdir}/", mode:'copy'
 
+  when:
+  param_run_statistics
+
   input:
   file protein_quants from stdprotquant_rots
 
@@ -501,6 +516,9 @@ process run_rots_analysis_peptides {
   label 'process_single_thread'
 
   publishDir "${params.outdir}/", mode:'copy'
+
+  when:
+  param_run_statistics
 
   input:
   file peptide_quants from stdpepquant_rots
