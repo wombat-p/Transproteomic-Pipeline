@@ -78,6 +78,7 @@ for (i in 1:(nr_groups-1)) {
 }
 
 # put all data together
-RES_complete <- merge(D, RES_complete, by = "pep_sequence", all = TRUE)
+RES_complete <- merge(D, RES_complete, by.x = "modified_peptide", by.y = "pep_sequence", all = TRUE)
+colnames(RES_complete)[1] <- "modified_peptide"
 
 write.csv(RES_complete, "stand_pep_quant_merged.csv", row.names = FALSE)

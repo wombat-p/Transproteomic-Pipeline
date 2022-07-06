@@ -76,6 +76,7 @@ for (i in 1:(nr_groups-1)) {
   }
 }
 # put all data together
-RES_complete <- merge(D, RES_complete, by = "protein_name", all = TRUE)
+RES_complete <- merge(D, RES_complete, by.x = "protein_group", by.y = "protein_name", all = TRUE)
+colnames(RES_complete)[1] <- "protein_group"
 
 write.csv(RES_complete, "stand_prot_quant_merged.csv", row.names = FALSE)
