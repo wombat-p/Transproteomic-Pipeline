@@ -61,7 +61,7 @@ for (i in 1:(nr_groups-1)) {
     RES <- ROTS(D_tmp2, groups = as.numeric(group_tmp), log = TRUE,
         paired = FALSE, B = rotsparam_B, K = rotsparam_K, progress = TRUE)
 
-    RES2 <- data.frame(protein_name = protein_name2, pvalue = RES$pvalue, FDR = RES$FDR, logfc = RES$logfc)
+    RES2 <- data.frame(protein_name = protein_name2, differential_abundance_pvalue = RES$pvalue, differential_abundance_qvalue = RES$FDR, log_ratios = RES$logfc)
     rm(RES)
     colnames(RES2)[2:4] <- paste0(colnames(RES2)[2:4], "_", i_level, "_vs_", j_level)
 
@@ -75,5 +75,7 @@ for (i in 1:(nr_groups-1)) {
     gc()
   }
 }
+# put all data together
+RES_complete <- merge(D, RES_complete, by = "protein_name", all = TRUE)
 
-write.csv(RES_complete, "all_prot_quant_ROTS.csv", row.names = FALSE)
+write.csv(RES_complete, "stand_prot_quant_merged.csv", row.names = FALSE)

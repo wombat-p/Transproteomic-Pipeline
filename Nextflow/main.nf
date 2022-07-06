@@ -454,37 +454,9 @@ process run_merge_quant {
     }
 }
 
-/*
- * STEP 8 - Some QC
-*/
-process run_final_qc {
-  label 'process_medium'
-  label 'process_single_thread'
-  
-  publishDir "${params.outdir}/", mode:'copy'
-  
-  input:
-  val foo from JsonOutput.prettyPrint(JsonOutput.toJson(params))
-  file exp_design_file from expdesign
-  file std_prot_file from stdprotquant_qc
-  file std_pep_file from stdpepquant_qc
-  file fasta_file from fasta_qc
-  
-  output:
-  file "params.json" into parameters
-  file "benchmarks.json" into benchmarks
-  
-  script:
-  """
-  echo '$foo' > params.json
-  cp "${fasta_file}" database.fasta
-  R CMD BATCH $baseDir/scripts/CalcBenchmarks.R
-  """
-}
-
 
 /*
- * STEP 9a - run ROTS an proteins
+ * STEP 8a - run ROTS an proteins
  */ 
 process run_rots_analysis_proteins {
   label 'process_medium'
@@ -499,7 +471,7 @@ process run_rots_analysis_proteins {
   file protein_quants from stdprotquant_rots
 
   output:
-  file "all_prot_quant_ROTS.csv" into protein_quants_rots
+  file "stand_prot_quant_merged.csv" into protein_quants_rots
 
   script:
   """
@@ -509,7 +481,7 @@ process run_rots_analysis_proteins {
 
 
 /*
- * STEP 9b - run ROTS an peptides
+ * STEP 8b - run ROTS an peptides
  */ 
 process run_rots_analysis_peptides {
   label 'process_medium'
@@ -524,7 +496,7 @@ process run_rots_analysis_peptides {
   file peptide_quants from stdpepquant_rots
 
   output:
-  file "all_pep_quant_ROTS.csv" into peptide_quants_rots
+  file "stand_pep_quant_merged.csv" into peptide_quants_rots
 
   script:
   """
@@ -532,6 +504,33 @@ process run_rots_analysis_peptides {
   """
 }
 
+/*
+ * STEP 9 - Some QC
+*/
+process run_final_qc {
+  label 'process_medium'
+  label 'process_single_thread'
+  
+  publishDir "${params.outdir}/", mode:'copy'
+  
+  input:
+  val foo from JsonOutput.prettyPrint(JsonOutput.toJson(params))
+  file exp_design_file from expdesign
+  file std_prot_file from protein_quants_rots
+  file std_pep_file from peptide_quants_rots
+  file fasta_file from fasta_qc
+  
+  output:
+  file "params.json" into parameters
+  file "benchmarks.json" into benchmarks
+  
+  script:
+  """
+  echo '$foo' > params.json
+  cp "${fasta_file}" database.fasta
+  R CMD BATCH $baseDir/scripts/CalcBenchmarks.R
+  """
+}
 
 workflow.onComplete {
     log.info ( workflow.success ? "\nDone! Open the files in the following folder --> $params.outdir\n" : "Oops .. something went wrong" )
