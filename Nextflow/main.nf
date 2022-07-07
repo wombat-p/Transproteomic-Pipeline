@@ -57,8 +57,9 @@ def helpMessage() {
       --quantification_fdr              FDR threshold to accept peptides for quantification
       --quantification_min_prob         Specify a minimum probability cut off for quantification
       --experiment_design               Text-file containing 2 columns: first with raw file names and second with names for experimental conditions
-
-
+    
+    Run statistics
+      --run_statistics			            Either true or false (default true)
           
     Other options:
       --outdir                          The output directory where the results will be saved
@@ -123,6 +124,8 @@ params.min_num_peptides = 2
 
 params.experiment_design = "none"
 
+params.run_statistics = true
+
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -163,7 +166,6 @@ if ((params.comet_param_file != "none") && !(file(params.comet_param_file).exist
   log.error "Specified comet parameter file does not exit"; exit 1
 }
 
-
 /* 
  * Create a channel for experimental design file
  */
@@ -172,6 +174,16 @@ if (params.experiment_design == "none") {
   log.warn "No experimental design! All raw files will be considered being from the one and the same experimental condition."
 } else if(!(file(params.experiment_design).exists())) {
   log.error "File with experimental design does not exit"; exit 1  
+}
+
+/*
+ * set up param_run_statistics
+ */
+if (params.run_statistics && (params.experiment_design == "none")) {
+  log.warn "Without experimental design, the ROTS statistics are deactivated as well."
+  param_run_statistics = false
+} else {
+  param_run_statistics = params.run_statistics
 }
 
 
@@ -418,8 +430,8 @@ process run_merge_quant {
   output:
   file "all_prot_quant_merged.csv" into allprotquant
   file "all_pep_quant_merged.csv" into allpepquant
-  file "stand_prot_quant_merged.csv" into stdprotquant
-  file "stand_pep_quant_merged.csv" into stdpepquant
+  file "stand_prot_quant_merged.csv" into (stdprotquant_qc, stdprotquant_rots)
+  file "stand_pep_quant_merged.csv" into (stdpepquant_qc, stdpepquant_rots)
   file "exp_design.txt" into expdesign
   
   script:
@@ -442,8 +454,58 @@ process run_merge_quant {
     }
 }
 
+
 /*
- * STEP 8 - Some QC
+ * STEP 8a - run ROTS an proteins
+ */ 
+process run_rots_analysis_proteins {
+  label 'process_medium'
+  label 'process_single_thread'
+
+  publishDir "${params.outdir}/", mode:'copy'
+
+  when:
+  param_run_statistics
+
+  input:
+  file protein_quants from stdprotquant_rots
+
+  output:
+  file "stand_prot_quant_merged.csv" into protein_quants_rots
+
+  script:
+  """
+  R CMD BATCH $baseDir/scripts/rots_analysis_proteins.R
+  """
+}
+
+
+/*
+ * STEP 8b - run ROTS an peptides
+ */ 
+process run_rots_analysis_peptides {
+  label 'process_medium'
+  label 'process_single_thread'
+
+  publishDir "${params.outdir}/", mode:'copy'
+
+  when:
+  param_run_statistics
+
+  input:
+  file peptide_quants from stdpepquant_rots
+
+  output:
+  file "stand_pep_quant_merged.csv" into peptide_quants_rots
+
+  script:
+  """
+  R CMD BATCH $baseDir/scripts/rots_analysis_peptides.R
+  """
+}
+
+/*
+ * STEP 9 - Some QC
 */
 process run_final_qc {
   label 'process_medium'
@@ -451,27 +513,24 @@ process run_final_qc {
   
   publishDir "${params.outdir}/", mode:'copy'
   
-    input:
-        val foo from JsonOutput.prettyPrint(JsonOutput.toJson(params))
-	file exp_design_file from expdesign
-	file std_prot_file from stdprotquant
-	file std_pep_file from stdpepquant
-	file fasta_file from fasta_qc
- 
+  input:
+  val foo from JsonOutput.prettyPrint(JsonOutput.toJson(params))
+  file exp_design_file from expdesign
+  file std_prot_file from protein_quants_rots
+  file std_pep_file from peptide_quants_rots
+  file fasta_file from fasta_qc
+  
   output:
-   file "params.json" into parameters
-   file "benchmarks.json" into benchmarks
+  file "params.json" into parameters
+  file "benchmarks.json" into benchmarks
   
   script:
   """
   echo '$foo' > params.json
   cp "${fasta_file}" database.fasta
   R CMD BATCH $baseDir/scripts/CalcBenchmarks.R
-
   """
 }
-
-
 
 workflow.onComplete {
     log.info ( workflow.success ? "\nDone! Open the files in the following folder --> $params.outdir\n" : "Oops .. something went wrong" )

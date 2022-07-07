@@ -167,10 +167,10 @@ Performance[["Quantification"]] <- Quantification
 ## Statistics
 Statistics=list()
 # Calculate the average per comparison (columns)
-tstat <- StatsPep[,grep("^differential_regulation_", colnames(StatsPep)), drop=F]
+tstat <- StatsPep[,grep("^differential_abundance_qvalue", colnames(StatsPep)), drop=F]
 Statistics[["DifferentialRegulatedPeptides5Perc"]]  <- colSums(tstat < 0.05, na.rm=T) / ncol(tstat)
 Statistics[["DifferentialRegulatedPeptides1Perc"]]  <- colSums(tstat < 0.01, na.rm=T) / ncol(tstat)
-tstat <- StatsProt[,grep("^differential_regulation_", colnames(StatsProt)), drop=F]
+tstat <- StatsProt[,grep("^differential_abundance_qvalue", colnames(StatsProt)), drop=F]
 Statistics[["DifferentialRegulatedProteins5Perc"]]  <- colSums(tstat < 0.05, na.rm=T) / ncol(tstat)
 Statistics[["DifferentialRegulatedProteins1Perc"]]  <- colSums(tstat < 0.01, na.rm=T) / ncol(tstat)
 # Percentages in full data
@@ -186,7 +186,7 @@ Performance[["Digestion"]] <- Digestion
 ## PTMs
 PTMs=list()
 # percentages of different PTMs
-mods <- str_extract_all( StatsPep$modified_peptide, "\\[[0-9,\\.]*\\]|\\([a-z,A-Z]*\\)|\\<[a-z,A-Z]*\\>")
+mods <- str_extract_all( StatsPep$modified_peptide, "\\[[a-z,A-Z,0-9,\\.]*\\]|\\([a-z,A-Z]*\\)|\\<[a-z,A-Z]*\\>")
 PTMs[["PTMDistribution"]] <- as.data.frame(table(unlist(mods)))
 # How many PTMs per peptide
 PTMs[["PTMOccupancy"]] <- as.data.frame(table(sapply(mods, length)))
